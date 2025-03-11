@@ -1,7 +1,8 @@
 import React from 'react'
 import { Routes , Route} from 'react-router-dom'
 import Home from './pages/Home'
-import Login from './pages/Login'
+import SignUp from './pages/SignUp'; // The SignUp component
+import Login from './pages/Login';
 import EmailVerify from './pages/EmailVerify'
 import ResetPassword from './pages/ResetPassword'
 import { ToastContainer } from 'react-toastify';
@@ -15,6 +16,7 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
+        <Route path='/register' element={<SignUp/>} />
         <Route path='/email-verify' element={<EmailVerify/>}/>
         <Route path='/reset-password' element={<ResetPassword/>}/>
       </Routes>

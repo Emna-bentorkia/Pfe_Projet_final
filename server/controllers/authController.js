@@ -86,7 +86,17 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000 // Durée de validité du cookie (7 jours)
         });
 
-        return res.json({ success: true, message: "Connexion réussie", token });
+        return res.json({
+            success: true,
+            message: "Connexion réussie",
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                isAccountVerified: user.isAccountVerified
+            }
+        });
+        
 
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -154,54 +164,73 @@ export const sendVerifyOtp = async (req, res) => {
 
 
 export const verifyEmail = async (req, res) => {
-    try {
-        const { email, otp } = req.body;
+  const { email, otp } = req.body;
 
-        if (!email || !otp) {
-            return res.status(400).json({ success: false, message: "Missing details" });
-        }
+  // Validation des entrées
+  if (!email || !otp) {
+    return res.status(400).json({ success: false, message: 'Email et OTP sont requis.' });
+  }
 
-        const user = await userModel.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        if (user.isAccountVerified) {
-            return res.status(400).json({ success: false, message: "Account already verified" });
-        }
-
-        console.log("Stored OTP:", user.verifyOtp, "Entered OTP:", otp);
-
-        if (!user.verifyOtp || user.verifyOtp.toString() !== otp.toString()) {
-            return res.status(400).json({ success: false, message: "Invalid verification code" });
-        }
-
-        if (user.verifyOtpExpireAt < Date.now()) {
-            return res.status(400).json({ success: false, message: "Verification code expired" });
-        }
-
-        user.isAccountVerified = true;
-        user.verifyOtp = "";
-        user.verifyOtpExpireAt = null;
-        await user.save();
-
-        return res.json({ success: true, message: "Email verified successfully" });
-
-    } catch (error) {
-        console.error("Error verifying email:", error);
-        return res.status(500).json({ success: false, message: error.message });
+  try {
+    // Recherche de l'utilisateur
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Utilisateur non trouvé.' });
     }
+
+    // Vérification si le compte est déjà vérifié
+    if (user.isAccountVerified) {
+      return res.status(400).json({ success: false, message: 'Le compte est déjà vérifié.' });
+    }
+
+    // Vérification de l'OTP
+    if (!user.verifyOtp || user.verifyOtp.toString() !== otp.toString()) {
+      return res.status(400).json({ success: false, message: 'Code OTP invalide.' });
+    }
+
+    // Vérification de l'expiration de l'OTP
+    if (user.verifyOtpExpireAt < Date.now()) {
+      user.verifyOtp = '';
+      user.verifyOtpExpireAt = null;
+      await user.save();
+      return res.status(400).json({ success: false, message: 'Le code OTP a expiré.' });
+    }
+
+    // Marquer le compte comme vérifié
+    user.isAccountVerified = true;
+    user.verifyOtp = '';
+    user.verifyOtpExpireAt = null;
+    await user.save();
+
+    return res.json({ success: true, message: 'E-mail vérifié avec succès.' });
+  } catch (error) {
+    console.error('Erreur lors de la vérification de l\'e-mail :', error);
+    return res.status(500).json({ success: false, message: 'Une erreur est survenue lors de la vérification.' });
+  }
 };
 
 //check if user is authenticated
-export const isAuthenticated = async (req, res)=>{
+export const isAuthenticated = async (req, res) => {
     try {
-        return res.json({ success: true});
+        const token = req.cookies.token; // Récupère le token
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Unauthorized" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await userModel.findById(decoded.id).select("-password");
+
+        if (!user) {
+            return res.status(401).json({ success: false, message: "User not found" });
+        }
+
+        return res.json({ success: true, user });
 
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 //send password reset
 export const sendResetOtp = async (req, res)=>{
