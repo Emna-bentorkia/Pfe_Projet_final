@@ -4,6 +4,7 @@ import { AppContent } from "../context/AppContent";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { assets } from "../assets/assets";
+import Cookies from "js-cookie";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -35,15 +36,21 @@ const SignUp = () => {
       if (data.success) {
         toast.success("Inscription réussie ! Vérifiez votre email pour valider votre compte.");
 
+        // Stocker le token dans les cookies (si renvoyé par le backend)
+        if (data.token) {
+          Cookies.set('token', data.token, { expires: 7, path: '/', domain: window.location.hostname });
+        }
+
         // Enregistrer l'email dans le localStorage pour qu'il soit accessible dans EmailVerify.jsx
         localStorage.setItem("email", formData.email);
-        
+
         setIsVerificationSent(true); // Afficher l'interface de vérification
         navigate("/email-verify"); // Rediriger vers la page de vérification de l'email
       } else {
         toast.error(data.message);
       }
     } catch (error) {
+      console.error("Erreur lors de l'inscription :", error.response?.data); // Afficher l'erreur détaillée
       toast.error(error.response?.data?.message || "Une erreur est survenue");
     }
   };

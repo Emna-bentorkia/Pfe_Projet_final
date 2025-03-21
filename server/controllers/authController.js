@@ -6,26 +6,65 @@ import transporter from '../config/nodemailer.js';
 export const register = async (req, res) => {
     const { name, lastname, email, password, confirmpassword, dateBirth, numeroPhone, adress } = req.body;
 
+    // Vérification des champs obligatoires
     if (!name || !lastname || !email || !password || !confirmpassword || !dateBirth || !numeroPhone || !adress) {
         return res.status(400).json({ success: false, message: 'Missing details' });
     }
 
+    // Vérification que les mots de passe correspondent
     if (password !== confirmpassword) {
         return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
 
+    // Validation du mot de passe
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character (@$!%*?&).' 
+        });
+    }
+
+    // Validation de l'email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ success: false, message: 'Invalid email format' });
+    }
+
+    // Validation de la date de naissance
+    const today = new Date();
+    const birthDate = new Date(dateBirth);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    const dayDifference = today.getDate() - birthDate.getDate();
+
+    if (age < 18 || (age === 18 && (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)))) {
+        return res.status(400).json({ success: false, message: 'You must be at least 18 years old to register.' });
+    }
+
     try {
+        // Vérification si l'utilisateur existe déjà
         const existingUser = await userModel.findOne({ email });
 
         if (existingUser) {
             return res.status(400).json({ success: false, message: "User already exists" });
         }
 
+        // Hashage du mot de passe
         const hashedPassword = await bcrypt.hash(password, 8);
+
+        // Génération de l'OTP
         const otp = String(Math.floor(100000 + Math.random() * 900000));
 
+        // Création de l'utilisateur
         const user = new userModel({ 
-            name, lastname, email, password: hashedPassword, dateBirth, numeroPhone, adress, 
+            name, 
+            lastname, 
+            email, 
+            password: hashedPassword, 
+            dateBirth, 
+            numeroPhone, 
+            adress, 
             verifyOtp: otp,
             verifyOtpExpireAt: Date.now() + 24 * 60 * 60 * 1000 // 24h
         });
@@ -50,29 +89,28 @@ export const register = async (req, res) => {
     }
 };
 
-
 export const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ success: false, message: 'L\'email et le mot de passe sont requis' });
+        return res.status(400).json({ success: false, message: 'Email and password are required' });
     }
 
     try {
         const user = await userModel.findOne({ email });
 
         if (!user) {
-            return res.status(400).json({ success: false, message: 'Email invalide' });
+            return res.status(400).json({ success: false, message: 'Invalid email' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({ success: false, message: 'Mot de passe invalide' });
+            return res.status(400).json({ success: false, message: 'Invalid password' });
         }
 
         if (!user.isAccountVerified) {
-            return res.status(400).json({ success: false, message: 'Compte non vérifié. Vérifiez votre email.' });
+            return res.status(400).json({ success: false, message: 'Account not verified. Check your email.' });
         }
 
         // Création du token JWT
@@ -80,7 +118,7 @@ export const login = async (req, res) => {
 
         // Envoi du token via un cookie sécurisé
         res.cookie('token', token, {
-            httpOnly: true, // Empêche l'accès au cookie par JavaScript
+            httpOnly: true, // Empêche l'accès au cookie via JavaScript
             secure: process.env.NODE_ENV === 'production', // Utilise HTTPS en production
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Sécurisation des cookies
             maxAge: 7 * 24 * 60 * 60 * 1000 // Durée de validité du cookie (7 jours)
@@ -88,7 +126,7 @@ export const login = async (req, res) => {
 
         return res.json({
             success: true,
-            message: "Connexion réussie",
+            message: "Login successful",
             token,
             user: {
                 id: user._id,
@@ -96,7 +134,6 @@ export const login = async (req, res) => {
                 isAccountVerified: user.isAccountVerified
             }
         });
-        
 
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
@@ -212,7 +249,7 @@ export const verifyEmail = async (req, res) => {
 //check if user is authenticated
 export const isAuthenticated = async (req, res) => {
     try {
-        const token = req.cookies.token; // Récupère le token
+        const token = req.cookies.token || req.headers.authorization?.split(' ')[1]; // Récupère le token
         if (!token) {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
