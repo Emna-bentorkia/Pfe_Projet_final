@@ -71,7 +71,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className='flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-pink-200 to-purple-400'>
+    <div className='flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400'>
       <img
         onClick={() => navigate('/')}
         src={assets.logo}
@@ -80,10 +80,10 @@ const ResetPassword = () => {
       />
       {/* Email Input */}
       {!isEmailSent && (
-        <form onSubmit={onSubmitEmail} className='bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm'>
-          <h1 className='text-white text-2xl font-semibold text-center mb-4'>Reset Password</h1>
-          <p className='text-center mb-6 text-indigo-300'>Enter your registered email address</p>
-          <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
+        <form onSubmit={onSubmitEmail} className='backdrop-blur-md bg-white/10 p-8 rounded-lg shadow-lg w-96 text-sm'>
+          <h1 className='text-[#45659c84]  text-2xl font-semibold text-center mb-4'>Reset Password</h1>
+          <p className='text-center mb-6 text-[#45659c84] '>Enter your registered email address</p>
+          <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full backdrop-blur-md bg-white/10'>
             <img src={assets.mail_icon} alt='' className='w-3 h-3' />
             <input type='email' placeholder='Email ID'
               className='bg-transparent outline-none text-white'
@@ -95,9 +95,9 @@ const ResetPassword = () => {
 
       {/* OTP Input Form */}
       {!isOtpSubmited && isEmailSent && (
-        <form onSubmit={onSubmitOTP} className='bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm'>
-          <h1 className='text-white text-2xl font-semibold text-center mb-4'>Reset Password OTP</h1>
-          <p className='text-center mb-6 text-indigo-300'>Enter the 6-digit code sent to your email ID.</p>
+        <form onSubmit={onSubmitOTP} className='backdrop-blur-md bg-white/10 p-8 rounded-lg shadow-lg w-96 text-sm'>
+          <h1 className='text-[#45659c84]  text-2xl font-semibold text-center mb-4'>Reset Password OTP</h1>
+          <p className='text-center mb-6 text-[#45659c84] '>Enter the 6-digit code sent to your email ID.</p>
           <div className='flex justify-between mb-8' onPaste={handlePaste}>
             {Array(6).fill(0).map((_, index) => (
               <input
@@ -105,7 +105,7 @@ const ResetPassword = () => {
                 maxLength='1'
                 key={index}
                 required
-                className='w-12 h-12 bg-[#333A5C] text-white text-center text-xl rounded-md'
+                className='w-12 h-12 backdrop-blur-md bg-white/10 text-white text-center text-xl rounded-md'
                 ref={(el) => (inputRefs.current[index] = el)}
                 onInput={(e) => handleInput(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
@@ -118,10 +118,10 @@ const ResetPassword = () => {
 
       {/* New Password Input */}
       {isOtpSubmited && isEmailSent && (
-        <form onSubmit={onSubmitNewPassword} className='bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm'>
-          <h1 className='text-white text-2xl font-semibold text-center mb-4'>New Password</h1>
-          <p className='text-center mb-6 text-indigo-300'>Enter the new password below</p>
-          <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
+        <form onSubmit={onSubmitNewPassword} className='backdrop-blur-md bg-white/10 p-8 rounded-lg shadow-lg w-96 text-sm'>
+          <h1 className='text-[#45659c84]  text-2xl font-semibold text-center mb-4'>New Password</h1>
+          <p className='text-center mb-6 text-[#45659c84] '>Enter the new password below</p>
+          <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full backdrop-blur-md bg-white/10'>
             <img src={assets.lock_icon} alt='' className='w-3 h-3' />
             <input type='password' placeholder='Password'
               className='bg-transparent outline-none text-white'

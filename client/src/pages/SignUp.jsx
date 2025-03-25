@@ -56,22 +56,22 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-pink-200 to-purple-400">
+    <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
       <img
         onClick={() => navigate("/")}
         src={assets.logo}
         alt="Logo"
         className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
       />
-      <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm">
-        <h2 className="text-3xl font-semibold text-white text-center mb-3">Create Account</h2>
+      <div className="backdrop-blur-md bg-white/10 p-8 sm:p-10 rounded-2xl shadow-2xl w-full sm:w-[450px] text-[#45659c84] text-sm mt-28 sm:mt-26">
+        <h2 className="text-3xl font-semibold text-[#45659c84] text-center mb-3">Create Account</h2>
         <p className="text-center text-sm mb-6">Create your account</p>
 
         <form onSubmit={onSubmitHandler}>
           {[...Array(8).keys()].map((index) => (
-            <div key={index} className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
+            <div key={index} className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full backdrop-blur bg-white/10">
               <input
-                className="bg-transparent outline-none w-full text-white"
+                className="bg-transparent outline-none w-full text-[#16191ea5]"
                 type={index === 5 || index === 6 ? "password" : index === 2 ? "date" : "text"}
                 name={["name", "lastname", "dateBirth", "numeroPhone", "email", "password", "confirmpassword", "adress"][index]}
                 placeholder={["Nom", "Prénom", "Date de naissance", "Numéro de téléphone", "Email", "Mot de passe", "Confirmer le mot de passe", "Adresse"][index]}
@@ -96,9 +96,9 @@ const SignUp = () => {
           </p>
         )}
 
-        <p className="text-gray-400 text-center text-xs mt-4">
+        <p className="text-[#424c5fac] text-center text-xs mt-4">
           Vous avez déjà un compte ?{" "}
-          <span onClick={() => navigate("/login")} className="text-blue-400 cursor-pointer underline">
+          <span onClick={() => navigate("/login")} className="text-blue-500 cursor-pointer underline">
             Connectez-vous ici
           </span>
         </p>
