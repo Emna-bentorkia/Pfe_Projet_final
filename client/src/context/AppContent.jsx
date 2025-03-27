@@ -8,7 +8,7 @@ export const AppContextProvider = ({ children }) => {
     // Activer les cookies dans les requêtes axios
     axios.defaults.withCredentials = true;
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
     const [isLoggedin, setIsLoggedin] = useState(false);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
